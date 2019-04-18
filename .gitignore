@@ -1,0 +1,18 @@
+
+gameClient/.vs/gameClient/v16/.suo
+gameClient/.vs/gameClient/v16/Browse.VC.db
+gameClient/.vs/gameClient/v16/ipch/AutoPCH/23d96506a154c4de/GOMOKUCLI.ipch
+*.ipch
+*.exe
+*.ilk
+*.log
+*.pdb
+*.tlog
+*.obj
+*.idb
+*.sln
+*.vcxproj
+*.filters
+*.user
+Pacific Proving Grounds/.vs/Pacific Proving Grounds/v16/.suo
+*.db
