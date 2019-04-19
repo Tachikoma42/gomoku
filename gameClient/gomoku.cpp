@@ -1,9 +1,10 @@
-#include<stdio.h>
 #include<stdlib.h>
 #include<algorithm>
 #include"gomoku.h"
-
-
+#include<WinSock2.h>
+#include<stdio.h>
+#include<string>
+#pragma comment(lib, "WS2_32")
 
 void initGame(gomoku* current)
 {
@@ -235,4 +236,74 @@ bool findStone(location targetLocation, location stoneLocation[], int index, int
 		}
 	}
 	return discovered;
+}
+
+Server::Server()
+{
+
+	mVersionRequested = MAKEWORD(2, 2);
+	WSAStartup(mVersionRequested, &wsaData);
+	sockSrv = socket(AF_INET, SOCK_STREAM, 0);
+	addrSrv.sin_family = AF_INET;
+	addrSrv.sin_port = htons(1234);
+	addrSrv.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
+	bind(sockSrv, (SOCKADDR*)& addrSrv, sizeof(addrSrv));
+	listen(sockSrv, 10);
+	len = sizeof(addrClient);
+	sockConn = accept(sockSrv, (SOCKADDR*)& addrClient, &len);
+}
+
+Server::~Server()
+{
+	closesocket(sockConn);
+}
+
+Client::Client()
+{
+	mVersionRequested = MAKEWORD(2, 2);
+	WSAStartup(mVersionRequested, &wsaData);
+	sockConn = socket(AF_INET, SOCK_STREAM, 0);
+	addrSrv.sin_family = AF_INET;
+	addrSrv.sin_port = htons(1234);
+	getServerIP(serverAddr);
+	addrSrv.sin_addr.S_un.S_addr = inet_addr(serverAddr);
+	connect(sockConn, (SOCKADDR*)& addrSrv, sizeof(addrSrv));
+}
+
+Client::~Client()
+{
+	closesocket(sockConn);
+}
+
+
+void getServerIP(char* serverAddr)
+{
+	printf("Please input the ip address of the server\n");
+	//fgets(serverAddr, 50, stdin);
+	scanf("%s", serverAddr);
+}
+
+void sendStone(SOCKET sockClient, location stoneLocation, bool winStatus)
+{
+	char x[2];
+	char y[2];
+	char win[2];
+	itoa(stoneLocation.x, x, 10);
+	itoa(stoneLocation.y, y, 10);
+	itoa(winStatus, win, 10);
+	send(sockClient, x, sizeof(x), 0);
+	send(sockClient, y, sizeof(y), 0);
+	send(sockClient, win, sizeof(win), 0);
+}
+void recvStone(SOCKET sockClient, location* stoneLocation, bool *winStatus)
+{
+	char x[2];
+	char y[2];
+	char win[2];
+	recv(sockClient, x, sizeof(x), 0);
+	recv(sockClient, y, sizeof(y), 0);
+	recv(sockClient, win, sizeof(win), 0);
+	stoneLocation->x = atoi(x);
+	stoneLocation->y = atoi(y);
+	*winStatus = atoi(win);
 }

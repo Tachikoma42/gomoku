@@ -1,4 +1,4 @@
-#include "gameClient/gomoku.h"
+#include "gomoku.h"
 
 int main()
 {

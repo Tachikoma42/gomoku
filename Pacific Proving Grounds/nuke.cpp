@@ -1,256 +1,89 @@
+#include<WinSock2.h>
 #include<stdio.h>
-#include<algorithm>
-#define boardSize 9
+#include<string>
+#pragma comment(lib, "WS2_32")
 
+//#define serverAddr "127.0.0.1"
 typedef struct LOCATION {
 	int x;
 	int y;
 }location;
-typedef struct Gomoku {
-	//int size;//set board size
-	char symobl[3];//set symbol for each other and void 
-	int clientPiece;//record how many pieces the client has put
-	int serverPiece;//record how many pieces the server has put
-	location clientLocation[81];//record the exact location of the pieces
-	location serverLocation[81];//record the exact location of the pieces
-	char allPieces[boardSize * boardSize];
-}gomoku;
-// int compare1(const void* a, const void* b)
-// {
-
-// 	location* stone1 = (location*)a;
-// 	location* stone2 = (location*)b;
-
-// 	return (stone1->x - stone2->x);
-// }
-// int compare2(const void* a, const void* b)
-// {
-
-// 	location* stone1 = (location*)a;
-// 	location* stone2 = (location*)b;
-
-// 	return (stone1->y - stone2->y);
-// }
-// void initGame(gomoku* current)
-// {
-// 	//	Discription:	initial a game board
-// 	//	Input:			current the current gomoku board
-// 	//	Output:			NULL
-// 	current->symobl[0] = '~';// no piece on this location
-// 	current->symobl[1] = 'x';// client piece on this location
-// 	current->symobl[2] = 'o';// server piece on this location
-// 	current->clientPiece = 0;
-// 	current->serverPiece = 0;
-
-// 	for (int i = 0; i < boardSize * boardSize; i++)
-// 		current->allPieces[i] = current->symobl[0];
-// }
-// bool pieceAvailability(location input, gomoku* current)
-// {
-// 	char piece = current->allPieces[(input.x - 1) * boardSize + input.y - 1];
-// 	if (piece != current->symobl[0])
-// 		return false;
-// 	return true;
-// }
-// void addPiece(location input, gomoku* current, bool client)
-// {	//	Discription:	add a piece to the current gomoku
-// 	//	Input:			input: location of the piece that need to be added
-// 	//					current: the current gokoku board
-// 	//					client: true for client/ false for server}
-// 	//	Output:			NULL
-// 	bool availability;
-// 	availability = pieceAvailability(input, current);
-// 	if (!availability)
-// 	{
-// 		printf("THIS PIECE IS TAKEN\n");
-// 		return;
-// 	}
-// 	if (client)
-// 	{
-// 		current->clientLocation[current->clientPiece] = input;
-// 		current->clientPiece++;
-// 		///*int stoneSize = current->clientPiece;
-// 		//location tempLocation[boardSize * boardSize];
-// 		//for (int i = 0; i < stoneSize; i++)
-// 		//	tempLocation[i] = current->clientLocation[i];
-// 		//qsort(tempLocation,templocation+stoneSize, )
-// 		//location  stoneLocation[81];*/
-// 		//qsort(current->clientLocation, current->clientPiece, sizeof(current->clientLocation[0]), compare);
-// 		current->allPieces[(input.x - 1) * boardSize + input.y - 1] = current->symobl[1] = current->symobl[1];
-
-// 	}
-// 	else
-// 	{
-// 		current->serverLocation[current->serverPiece] = input;
-// 		current->serverPiece++;
-// 		current->allPieces[(input.x - 1) * boardSize + input.y - 1] = current->symobl[1] = current->symobl[2];
-// 	}
-
-// }
-// void display(gomoku* current)
-// {
-// 	//	Discription:	display the current gomoku board
-// 	//	Input:			current the current gomoku board
-// 	//	Output:			NULL
-// 	system("cls");
-// 	for (int i = 0; i < boardSize; i++)
-// 	{
-// 		printf("\n");
-// 		for (int j = 0; j < boardSize; j++)
-// 			printf(" %c ", current->allPieces[i * boardSize + j]);
-// 	}
-// }
-// int main()
-// {
-// 	gomoku current;
-// 	location input;
-// 	initGame(&current);
-// 	addPiece({ 1,2 }, &current, true);
-// 	addPiece({ 2,4 }, &current, true);
-// 	addPiece({ 1,3 }, &current, true);
-// 	addPiece({ 3,7 }, &current, true);
-// 	//display(&current);
-// 	location stoneLoca[81];
-// 	for (int i = 0; i < current.clientPiece; i++)
-// 		stoneLoca[i] = current.clientLocation[i];
-// 	qsort(stoneLoca, current.clientPiece, sizeof(stoneLoca[0]),compare1);
-// 	qsort(stoneLoca, current.clientPiece, sizeof(stoneLoca[0]), compare2);
-
-// 	printf("\n");
-
-// 	return 0;
-// }
-
-bool checkWin(gomoku* current, bool client)
+typedef struct SOCKLOCATION{
+	char x[1];
+	char y[1];
+}socklocation;
+class Conn
 {
-	//	Discription:	check after input did you win
-	//	Input:			current: the current gomoku board
-	//					client: true to check client win/ false to check server win
-	//	Output:			bool win
-	int stoneSize;
-	location  stoneLocation[81];
-	bool winStatus = false;
-	if (client)
-	{
-		stoneSize = current->clientPiece;
-		for (int i = 0; i < stoneSize; i++)
-			stoneLocation[i] = current->clientLocation[i];
-	}
-	else
-	{
-		stoneSize = current->serverPiece;
-		for (int i = 0; i < stoneSize; i++)
-			stoneLocation[i] = current->serverLocation[i];
-	}
+private:
+	WORD mVersionRequested;
+    WSADATA wsaData;
+public:
+	SOCKET sockClient;
+	SOCKADDR_IN addrSrv;
 
-	if (stoneSize < 5)
-		return false;
-	//check horizontial
-	for(int i =0;i<stoneSize;i++)
-	{
-		location tempLoca = stoneLocation[i];
-		if (stoneSize - i < 5)
-			return winStatus;
-		if(checkHorizontial(tempLoca, stoneLocation, i, stoneSize)||checkVertical(tempLoca,stoneLocation,i,stoneSize)||checkDiagonal(tempLoca,stoneLocation,i,stoneSize))
-		{
-			winStatus = true;
-			return winStatus;
-		}
-	}
+	Conn(char serverAddr[50]);
+	~Conn();
+};
 
-	return winStatus;
+Conn::Conn(char serverAddr[50])
+{
+	mVersionRequested = MAKEWORD(2,2);
+	sockClient = socket(AF_INET, SOCK_STREAM, 0);
+	addrSrv.sin_family = AF_INET;
+    addrSrv.sin_port = htons(1234);
+    addrSrv.sin_addr.S_un.S_addr = inet_addr(serverAddr);
 }
-bool checkHorizontial(location tempLoca, location stoneLocation[],int i,int stoneSize)
+void sendStone(SOCKET sockClient, location stoneLocation, int len, int flags = 0)
 {
-	//check horizontial
-
-	bool winStatus = false;
-	if ((boardSize-tempLoca.y) < 4)
-		return winStatus;
-	else
-	{
-		int ylabel = tempLoca.y;
-		for (int j = i+1; j < i+5; j++)
-		{
-			ylabel++;
-			if (stoneLocation[j].y != ylabel)
-			{
-				winStatus = false;
-				break;
-			}
-			if (j == i + 4)
-				winStatus = true;
-		}
-	}
-	return winStatus;
-}
-bool checkVertical(location tempLoca, location stoneLocation[],int i,int stoneSize)
-{
-	//check vertical
-
-	bool winStatus = false;
-	if ((boardSize-tempLoca.x) < 4)
-		return winStatus;
-	else
-	{
-		int xlabel = tempLoca.x;
-		for (int j = i+1; j < i+5; j++)
-		{
-			xlabel++;
-			if (stoneLocation[j*boardSize].x != xlabel)
-			{
-				winStatus = false;
-				break;
-			}
-			if (j == i + 4)
-				winStatus = true;
-		}
-	}
-	return winStatus;
-}
-bool checkDiagonal(location tempLoca, location stoneLocation[],int i,int stoneSize)
-{
-	//check diagonal
-
-	bool winStatus = false;
-	//check left
-	if(tempLoca.x <5)
-		winStatus = false;
-	else
-	{
-		if((boardSize-tempLoca.y) < 4)
-			winStatus = false;
-		else
-		{
-			if(findStone({tempLoca.x+1,tempLoca.y-1},stoneLocation,i,stoneSize)&&findStone({tempLoca.x+2,tempLoca.y-2},stoneLocation,i,stoneSize)&&findStone({tempLoca.x+3,tempLoca.y-3},stoneLocation,i,stoneSize)&&findStone({tempLoca.x+4,tempLoca.y-4},stoneLocation,i,stoneSize))
-				winStatus = true;
-		}
-		
-	}
-	//check right
-
-	if(winStatus)
-		return winStatus;
-	else if((boardSize-tempLoca.x) < 4)
-		winStatus = false;
-	else
-	{
-		if(findStone({tempLoca.x+1,tempLoca.y+1},stoneLocation,i,stoneSize)&&findStone({tempLoca.x+2,tempLoca.y+2},stoneLocation,i,stoneSize)&&findStone({tempLoca.x+3,tempLoca.y+3},stoneLocation,i,stoneSize)&&findStone({tempLoca.x+4,tempLoca.y+4},stoneLocation,i,stoneSize))
-				winStatus = true;
-	}
-	
-	return winStatus;
+	socklocation sendLocation;
+	itoa(stoneLocation.x,sendLocation.x,10);
+	itoa(stoneLocation.y, sendLocation.y,10);
+	//memcpy(sendLocation.x,)
+	send(sockClient, (char*)&sendLocation, sizeof(socklocation), 0);
 
 }
-bool findStone(location targetLocation, location stoneLocation[], int index, int stoneSize)
+void recvStone(SOCKET sockClient, location stoneLocation, int len, int flags = 0)
 {
-	bool discovered = false;
-	for (int i = index;i<stoneSize;i++)
-	{
-		if((stoneLocation[i].x == targetLocation.x)&&(stoneLocation[i].y == targetLocation.y))
-		{
-			discovered = true;
-			break;
-		}
-	}
+	char buffer[10];
+	socklocation recvLocation;
+	recv(sockClient, buffer,sizeof(buffer),0);
+	memcpy(&recvLocation,buffer, sizeof(buffer));
+}
+int main()
+{
+    // //gcc client.c -lws2_32 -o client
+    char serverAddr[50];
+    printf("Please input the ip address of the server\n");
+    scanf("%s", &serverAddr);
+    
+    // WORD mVersionRequested;
+    // WSADATA wsaData;
+    // int err;
+
+    // mVersionRequested = MAKEWORD(2,2);
+
+    // err = WSAStartup(mVersionRequested, &wsaData);
+    // if (err != 0)
+    //     return SOCKET_ERROR;
+
+    // SOCKET sockClient = socket(AF_INET, SOCK_STREAM, 0);
+    // SOCKADDR_IN addrSrv;
+
+    // addrSrv.sin_family = AF_INET;
+    // addrSrv.sin_port = htons(1234);
+    // addrSrv.sin_addr.S_un.S_addr = inet_addr(serverAddr);
+	Conn conn(serverAddr);
+	connect(conn.sockClient, (SOCKADDR*)& conn.addrSrv, sizeof(conn.addrSrv));
+    char sendLocation[2];
+    char recvLocation[2];
+    while(TRUE)
+    {	    
+        recv(conn.sockClient, recvLocation, 2, 0);
+        printf("%s\n", recvLocation);
+        // scanf("%s", &sendLocation);
+        // send(sockClient, sendLocation, strlen(sendLocation) + 1, 0);
+    }
+    closesocket(conn.sockClient);
+
+    return 0;
 }
