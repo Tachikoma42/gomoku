@@ -4,11 +4,17 @@
 
 int main()
 {
-	Client cli;
-	location stone = { 1,2 };
-	bool winStatus = true;
-	sendStone(cli.sockConn, stone, winStatus);
-	recvStone(cli.sockConn, &stone, &winStatus);
-	printf("%d\n%d\n%d", stone.x, stone.y, winStatus);
+	printf("What role do you want to play?\n 1 for server\n2 for client");
+	int choice;
+	scanf("%d", &choice);
+	switch (choice)
+	{
+	case 1:
+		playServer();
+	case 2:
+		playClient();
+	default:
+		break;
+	}
 	return 0;
 }
