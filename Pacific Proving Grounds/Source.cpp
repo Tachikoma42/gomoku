@@ -1,17 +1,15 @@
 #include<stdio.h>
-#include<string.h>
-#include <stdlib.h>
-typedef struct LOCATION {
-	int x;
-	int y;
-}location;
 int main()
 {
-	location input;
-	char inLocation[3];
+	char inLocation[10];
+	bool stoneAvail;
+	int temp1;
+	int temp2;
+
+	printf("PLEASE INSERT A STONE\n");
+	temp1 = getc(stdin) - 48;
+	temp2 = getc(stdin) - 48;
 	scanf("%s", &inLocation);
-	int in = atoi(inLocation);
-	input.x = in / 10;
-	input.y = in % 10;
+
 	return 0;
 }

@@ -66,6 +66,8 @@ bool Stone::pieceAvailability(location input)
 	char piece = this->allPieces[(input.x - 1) * boardSize + input.y - 1];
 	if (piece != this->symobl[0])
 		return false;
+	if (input.x == 0 || input.y == 0)
+		return false;
 	return true;
 }
 
@@ -126,12 +128,20 @@ bool Stone::checkWin(bool client)
 
 void Stone::readInput(location* input, bool client)
 {
-	char inLocation[3];
-	scanf("%s", &inLocation);
-	int temp = atoi(inLocation);
-	input->x = temp / 10;
-	input->y = temp % 10;
-	this->addPiece(*input, client);
+	//char inLocation[1000];
+	bool stoneAvail = false;
+	int temp;
+	do
+	{
+		printf("PLEASE INSERT A STONE\n");
+		scanf("%d", &temp);
+		if (temp <= 0 || temp > 99)
+			continue;
+		input->x = temp / 10;
+		input->y = temp % 10;
+		stoneAvail = this->addPiece(*input, client);
+	} while (!stoneAvail);
+
 }
 
 bool Stone::checkHorizontial(location tempLoca, location stoneLocation[],int i,int stoneSize)
