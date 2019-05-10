@@ -261,7 +261,7 @@ Client::Client()
 	sockConn = socket(AF_INET, SOCK_STREAM, 0);
 	addrSrv.sin_family = AF_INET;
 	addrSrv.sin_port = htons(1234);
-	getServerIP(serverAddr);
+	//getServerIP(serverAddr);
 	addrSrv.sin_addr.S_un.S_addr = inet_addr(serverAddr);
 	connect(sockConn, (SOCKADDR*)& addrSrv, sizeof(addrSrv));
 }

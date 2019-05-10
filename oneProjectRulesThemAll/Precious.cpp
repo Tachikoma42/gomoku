@@ -2,6 +2,8 @@
 #include<stdio.h>
 int main()
 {
+	//gcc Precious.cpp gomoku.cpp gomoku.h -lws2_32 -o output
+
 	printf("What role do you want to play?\n1 for server\n2 for client\n");
 	int choice;
 	scanf("%d", &choice);
@@ -9,7 +11,6 @@ int main()
 	switch (choice)
 	{
 	case 1:
-
 		playServer();
 		break;
 	case 2:

@@ -24,9 +24,9 @@ Stone::~Stone()
 bool Stone::addPiece(location input, bool client)
 {
 	//	Discription:	add a piece to the current gomoku
-//	Input:			input: location of the piece that need to be added
-//					client: true for client/ false for server}
-//	Output:			NULL
+	//	Input:			input: location of the piece that need to be added
+	//					client: true for client/ false for server}
+	//	Output:			NULL
 	bool availability;
 	availability = pieceAvailability(input);
 	if (!availability)
@@ -244,15 +244,15 @@ Server::~Server()
 	closesocket(sockConn);
 }
 
-Client::Client()
+Client::Client(in_addr addr)
 {
 	mVersionRequested = MAKEWORD(2, 2);
 	WSAStartup(mVersionRequested, &wsaData);
 	sockConn = socket(AF_INET, SOCK_STREAM, 0);
 	addrSrv.sin_family = AF_INET;
 	addrSrv.sin_port = htons(1234);
-	getServerIP(serverAddr);
-	addrSrv.sin_addr.S_un.S_addr = inet_addr(serverAddr);
+	//getServerIP(serverAddr);
+	addrSrv.sin_addr.S_un.S_addr = inet_addr(inet_ntoa(addr));
 	connect(sockConn, (SOCKADDR*)& addrSrv, sizeof(addrSrv));
 }
 
@@ -262,37 +262,93 @@ Client::~Client()
 }
 
 //network logic
-void Client::getServerIP(char* serverAddr)
+//void Client::getServerIP(char* serverAddr)
+//{
+//	printf("Please input the ip address of the server\n");
+//	//fgets(serverAddr, 50, stdin);
+//	scanf("%s", serverAddr);
+//}
+
+castSer::castSer()
 {
-	printf("Please input the ip address of the server\n");
-	//fgets(serverAddr, 50, stdin);
-	scanf("%s", serverAddr);
+    mVersionRequested = MAKEWORD(2, 2);
+	WSAStartup(mVersionRequested, &wsaData);
+    s = socket(AF_INET, SOCK_DGRAM, 0);
+    sin.sin_family = AF_INET;
+	sin.sin_port = htons(4567);
+	sin.sin_addr.S_un.S_addr = INADDR_ANY;
+    bind(s, (SOCKADDR*)& sin, sizeof(sin));
+    mcast.imr_interface.S_un.S_addr = INADDR_ANY;
+	mcast.imr_multiaddr.S_un.S_addr = inet_addr("234.5.6.7");
+	setsockopt(s, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)& mcast, sizeof(mcast));
+    nAddrLen = sizeof(addrfrom);
+    while (true)
+	{
+        int nRet = recvfrom(s, buf, strlen(buf), 0, (sockaddr*)& addrfrom, &nAddrLen);
+		
+		if (nRet != SOCKET_ERROR)
+			break;
+    }
+}
+castSer::~castSer()
+{
+    closesocket(s);
+    WSACleanup();
+
+}
+
+castCli::castCli()
+{
+	mVersionRequested = MAKEWORD(2, 2);
+    WSAStartup(mVersionRequested, &wsaData);
+    s = socket(AF_INET, SOCK_DGRAM, 0);
+    mCast.sin_family = AF_INET;
+	mCast.sin_port = htons(4567);
+	mCast.sin_addr.S_un.S_addr = inet_addr("234.5.6.7");
+    char sz[] = "This is just a placeholder. \r\n";
+	sendto(s, sz, strlen(sz), 0, (sockaddr*)& mCast, sizeof(mCast));
+}
+castCli::~castCli()
+{
+	closesocket(s);
+    WSACleanup();
 }
 
 void sendStone(SOCKET sockClient, location stoneLocation, bool winStatus)
 {
-	char x[2];
-	char y[2];
+
+	// char x[2];
+	// char y[2];
 	char win[2];
-	itoa(stoneLocation.x, x, 10);
-	itoa(stoneLocation.y, y, 10);
+	// itoa(stoneLocation.x, x, 10);
+	// itoa(stoneLocation.y, y, 10);
 	itoa(winStatus, win, 10);
-	send(sockClient, x, sizeof(x), 0);
-	send(sockClient, y, sizeof(y), 0);
+	// send(sockClient, x, sizeof(x), 0);
+	// send(sockClient, y, sizeof(y), 0);
 	send(sockClient, win, sizeof(win), 0);
+	char buff[100];
+	memcpy(buff, &stoneLocation, sizeof(stoneLocation));
+	send(sockClient, buff, 100, 0);
+
 }
 
 void recvStone(SOCKET sockClient, location* stoneLocation, bool *winStatus)
 {
-	char x[2];
-	char y[2];
+	// char x[2];
+	// char y[2];
 	char win[2];
-	recv(sockClient, x, sizeof(x), 0);
-	recv(sockClient, y, sizeof(y), 0);
+	// recv(sockClient, x, sizeof(x), 0);
+	// recv(sockClient, y, sizeof(y), 0);
 	recv(sockClient, win, sizeof(win), 0);
-	stoneLocation->x = atoi(x);
-	stoneLocation->y = atoi(y);
+	// stoneLocation->x = atoi(x);
+	// stoneLocation->y = atoi(y);
 	*winStatus = atoi(win);
+	char recvBuf[100];
+	location recLo;
+	recv(sockClient, recvBuf, 100, 0);
+	memcpy(&recLo, recvBuf, sizeof(recLo));
+	stoneLocation->x = recLo.x;
+	stoneLocation->y = recLo.y;
 }
 
 //supportive function
@@ -311,7 +367,8 @@ int compare1(const void* a, const void* b)
 
 void playClient(void)
 {
-	Client clientSock;
+	castSer ser;
+	Client clientSock(ser.addrfrom.sin_addr);
 	Stone clientStone;
 	location recvLocation;
 	printf("LET'S PLAY THE GAME!\n CLIENT GOES FIRST\n");
@@ -343,6 +400,7 @@ void playClient(void)
 
 void playServer(void)
 {
+	castCli cli;
 	Server serverSock;
 	Stone serverStone;
 	location recvLocation;

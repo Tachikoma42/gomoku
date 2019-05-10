@@ -1,6 +1,8 @@
 #pragma once
 #include<WinSock2.h>
+#include<ws2tcpip.h>
 #include<stdio.h>
+#pragma comment(lib, "WS2_32")
 #define boardSize 9
 typedef struct LOCATION {
 	int x;
@@ -53,12 +55,42 @@ private:
 	WORD mVersionRequested;
 	WSADATA wsaData;
 	SOCKADDR_IN addrSrv;
-	char serverAddr[50];
-	void getServerIP(char* serverAddr);
+	// char serverAddr[50];
+	// void getServerIP(char* serverAddr);
 public:
 	SOCKET sockConn;
-	Client();
+	Client(in_addr addr);
 	~Client();
+};
+
+class castCli
+{
+    private:
+        WORD mVersionRequested;
+        WSADATA wsaData;
+        int err;
+        SOCKET s;
+        SOCKADDR_IN mCast;
+    public:
+        castCli();
+        ~castCli();
+};
+class castSer
+{
+    private:
+        WORD mVersionRequested;
+	    WSADATA wsaData;
+	    int err;
+        SOCKET s;
+        SOCKADDR_IN sin;
+        ip_mreq mcast;
+        
+        int nAddrLen;
+        char buf[128];
+    public:
+        sockaddr_in addrfrom;
+        castSer();
+        ~castSer();
 };
 
 //network logic
