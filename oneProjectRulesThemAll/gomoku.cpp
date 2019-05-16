@@ -282,6 +282,7 @@ castSer::castSer()
 	mcast.imr_multiaddr.S_un.S_addr = inet_addr("234.5.6.7");
 	setsockopt(s, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)& mcast, sizeof(mcast));
     nAddrLen = sizeof(addrfrom);
+	printf("WAITING TO BE DISCOVERED\n");
     while (true)
 	{
         int nRet = recvfrom(s, buf, strlen(buf), 0, (sockaddr*)& addrfrom, &nAddrLen);

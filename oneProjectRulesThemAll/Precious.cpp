@@ -11,10 +11,10 @@ int main()
 	switch (choice)
 	{
 	case 1:
-		playServer();
+		playServer(); // choose to be server
 		break;
 	case 2:
-		playClient();
+		playClient(); // choose to be server
 		break;
 	default:
 		printf("Wrong input");
