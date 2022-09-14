@@ -10,7 +10,7 @@ Gomoku is a game played on a 15x15 board. The goal is to get 5 stones in a row, 
 - Visual Studio 2019 as compiler
 - C++ 11
 
-## Projects hihglight
+## Projects highlight
 - A network based game
 - Automatic game room creation(when a player enters the game, it becomes the host of a game room)
 - Automatic game room matching(when second player enters the game, it becomes the client, and will automatically connect to the host)
@@ -19,8 +19,8 @@ Gomoku is a game played on a 15x15 board. The goal is to get 5 stones in a row, 
 - Game condition is transmitted by custom struct
 
 ## Screenshots
-![Screenshot]()
-![Screenshot]()
+![Screenshot](Assets/Picture1.png)
+![Screenshot](Assets/Picture2.png)
 
 
 ## Usage
@@ -34,5 +34,5 @@ Gomoku is a game played on a 15x15 board. The goal is to get 5 stones in a row, 
 - [multicast](https://en.wikipedia.org/wiki/IP_multicast)
 
 ## Books
-- [C++ Primer](https://www.amazon.com/Primer-5th-Stanley-B-Lippman/dp/0321714113)
+- [C++ Primer Plus](https://www.amazon.com/Primer-Plus-6th-Developers-Library/dp/0321776402)
 - [C++ network programming](https://www.amazon.com/Network-Programming-Mastering-Complexity-Patterns/dp/0201604647)
